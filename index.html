@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Iso-Lemmings</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #222;
+            color: white;
+            font-family: sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        #game-container {
+            flex-grow: 1;
+            position: relative;
+        }
+        #ui-container {
+            height: 150px;
+            background: #333;
+            display: flex;
+            flex-direction: column;
+            border-top: 2px solid #555;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        #timeline {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            flex-grow: 1;
+            padding: 5px;
+            background: #111;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            min-height: 60px;
+            align-items: center;
+        }
+        .card-slot {
+            width: 50px;
+            height: 70px;
+            background: #444;
+            border: 1px dashed #666;
+            border-radius: 4px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            text-align: center;
+            position: relative;
+        }
+        .card {
+            width: 50px;
+            height: 70px;
+            background: #66c;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            font-weight: bold;
+            font-size: 10px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .card:active {
+            transform: scale(0.95);
+        }
+        .card.turn-left { background: #c66; }
+        .card.turn-right { background: #6c6; }
+        .card.walk { background: #cc6; color: black; }
+
+        #controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #4a4;
+            border: none;
+            color: white;
+            border-radius: 4px;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        #available-cards {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .mini-card {
+            padding: 5px 10px;
+            background: #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+    <div id="ui-container">
+        <div id="available-cards">
+            <div class="card walk" onclick="addCard('walk')">WALK</div>
+            <div class="card turn-left" onclick="addCard('left')">TURN L</div>
+            <div class="card turn-right" onclick="addCard('right')">TURN R</div>
+        </div>
+        <div id="timeline">
+            <!-- Cards will be added here -->
+        </div>
+        <div id="controls">
+            <button id="start-btn" onclick="startGame()">START</button>
+            <button id="reset-btn" onclick="resetGame()">RESET</button>
+        </div>
+    </div>
+    <script type="module" src="/main.js"></script>
+    <script>
+        // Global functions for UI interaction
+        window.addCard = (type) => {
+            if (window.gameInstance && window.gameInstance.isStarted) return;
+            const timeline = document.getElementById('timeline');
+            const card = document.createElement('div');
+            card.className = `card ${type === 'left' ? 'turn-left' : type === 'right' ? 'turn-right' : 'walk'}`;
+            card.innerText = type.toUpperCase();
+            card.onclick = () => {
+                if (window.gameInstance && window.gameInstance.isStarted) return;
+                card.remove();
+                updateTimeline();
+            };
+            timeline.appendChild(card);
+            updateTimeline();
+        };
+
+        window.updateTimeline = () => {
+            const cards = Array.from(document.querySelectorAll('#timeline .card')).map(c => {
+                if (c.classList.contains('walk')) return 'walk';
+                if (c.classList.contains('turn-left')) return 'left';
+                if (c.classList.contains('turn-right')) return 'right';
+                return '';
+            });
+            if (window.setTimeline) window.setTimeline(cards);
+        };
+
+        window.startGame = () => {
+            if (window.onStartGame) window.onStartGame();
+        };
+
+        window.resetGame = () => {
+            if (window.onResetGame) window.onResetGame();
+            document.getElementById('timeline').innerHTML = '';
+            updateTimeline();
+        };
+    </script>
+</body>
+</html>
